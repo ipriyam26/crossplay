@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,8 @@ class _downListState extends State<downList> {
   String? directory;
   List? file;
   Directory? path;
+  final player = AudioPlayer();
+  bool _playing = false;
 
   @override
   void initState() {
@@ -53,6 +56,8 @@ class _downListState extends State<downList> {
           itemCount: file!.length,
           itemBuilder: (context, index) {
             if (file![index].toString().contains(".mp3")) {
+              int durationSong = 0;
+              int fixduration = 1;
               var pathf = p.join(
                   path.toString().replaceAll(RegExp("'"), ""),
                   file![index]
@@ -60,6 +65,12 @@ class _downListState extends State<downList> {
                       .split("/")
                       .last
                       .replaceAll(RegExp("'"), ""));
+              String pathOfSong = file![index]
+                  .toString()
+                  .replaceAll(RegExp("File: "), "")
+                  .replaceAll(RegExp("'"), "")
+                  .trim();
+              Timer _timer;
 
               return ListTile(
                 title: Text(
@@ -70,48 +81,63 @@ class _downListState extends State<downList> {
                       .replaceAll(RegExp("'"), ""),
                   style: TextStyle(color: Colors.white),
                 ),
-                trailing: IconButton(
-                  onPressed: () async {
-                    // print(file![index]
-                    //     .toString()
-                    //     .replaceAll(RegExp("File:  "), ""));
+                subtitle: _playing
+                    ? LinearProgressIndicator(
+                        value: (fixduration - durationSong) / fixduration,
+                        backgroundColor: Colors.grey,
+                        color: Colors.pink)
+                    : Container(),
+                trailing: _playing
+                    ? IconButton(
+                        onPressed: () async {
+                          var duration = await player
+                              .setFilePath(pathOfSong)
+                              .then((value) => print(value.toString()));
+                          player.pause();
+                          setState(() {
+                            _playing = false;
+                          });
+                          print(player.duration!);
+                          // _timer.cancel();
+                        },
+                        icon: const Icon(
+                          Icons.pause_circle_filled,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      )
+                    : IconButton(
+                        onPressed: () async {
+                          var duration = await player
+                              .setFilePath(pathOfSong)
+                              .then((value) => print(value.toString()));
+                          player.play();
+                          durationSong = player.duration!.inSeconds;
+                          fixduration = player.duration!.inSeconds;
+                          setState(() {
+                            _playing = true;
+                          });
 
-                    // int result = await audioPlayer.play(
-                    //     file![index].toString().replaceAll(RegExp("File:"), ""),
-                    //     isLocal: true);
-                    // print(result);
-
-                    String pathOfSong = file![index]
-                        .toString()
-                        .replaceAll(RegExp("File: "), "")
-                        .replaceAll(RegExp("'"), "")
-                        .trim();
-                    final player = AudioPlayer();
-                    var duration = await player
-                        .setFilePath(pathOfSong)
-                        .then((value) => print(value.toString()));
-                    player.play();
-                    print(player.duration!);
-                    // print(pathOfSong);
-                    // print(
-                    //     '/storage/emulated/0/Documents/A Thousand Years [Official Music Video].mp3');
-                    // print(
-                    //     // '/storage/emulated/0/Documents/A Thousand Years [Official Music Video].mp3'
-                    //     pathOfSong.length
-                    //         // .compareTo(pathOfSong)
-                    //         .toString());
-                    // print(
-                    //     '/storage/emulated/0/Documents/A Thousand Years [Official Music Video].mp3'
-                    //         .length);
-                    // await OpenFile.open(pathOfSong)
-                    //     .then((value) => print(value.message));
-                  },
-                  icon: const Icon(
-                    Icons.play_circle_fill,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
+                          _timer =
+                              Timer.periodic(Duration(seconds: 1), (timer) {
+                            if (durationSong > 0) {
+                              setState(() {
+                                durationSong--;
+                              });
+                            } else if (_playing == false) {
+                              timer.cancel();
+                            } else {
+                              timer.cancel();
+                            }
+                          });
+                          print(player.duration!);
+                        },
+                        icon: const Icon(
+                          Icons.play_circle_fill,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
               );
             }
             return Container();
