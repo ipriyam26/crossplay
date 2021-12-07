@@ -143,23 +143,27 @@ class _songCardState extends State<songCard> {
                                   ),
                                   Container(
                                     // color: Colors.pink,
-                                    height: Mheight * 0.05,
+                                    height: Mheight * 0.06,
                                     width: Mwidth * 0.44,
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        AutoSizeText(
-                                          Song.author,
-                                          style: const TextStyle(
-                                              shadows: [
-                                                Shadow(
-                                                    color: Colors.black,
-                                                    blurRadius: 2)
-                                              ],
-                                              fontSize: 19,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w700),
+                                        Container(
+                                          height: Mheight * 0.035,
+                                          width: Mwidth * 0.44,
+                                          child: AutoSizeText(
+                                            Song.author,
+                                            style: const TextStyle(
+                                                shadows: [
+                                                  Shadow(
+                                                      color: Colors.black,
+                                                      blurRadius: 2)
+                                                ],
+                                                fontSize: 19,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w700),
+                                          ),
                                         ),
                                         Text(
                                           DateFormat.yMMMd().format(
